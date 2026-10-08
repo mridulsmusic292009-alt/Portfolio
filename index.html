@@ -1724,31 +1724,39 @@
 
         <!-- Contact Form -->
         <div class="lg:col-span-3 classic-card p-6 sm:p-8 rounded-lg">
-          <form id="contact-form" class="space-y-4" onsubmit="handleFormSubmit(event)">
+          <form id="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="space-y-4" onsubmit="handleFormSubmit(event)">
+            <!-- Netlify Form Hidden Fields -->
+            <input type="hidden" name="form-name" value="contact" />
+            <p class="hidden">
+              <label>Don’t fill this out if you're human: <input name="bot-field" /></label>
+            </p>
+
             <div class="flex items-center justify-between border-b border-white/5 pb-3">
               <h3 class="text-base font-serif text-white">Send a Message</h3>
-              <span class="text-[10px] font-mono text-stone-500">CLIENT-SIDE FORM</span>
+              <span class="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> NETLIFY FORM ACTIVE
+              </span>
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="space-y-1">
                 <label for="name" class="block text-[11px] font-mono text-stone-400 uppercase">Your Name</label>
-                <input type="text" id="name" required placeholder="Alex Turner" class="w-full px-3.5 py-2.5 rounded bg-stone-900/90 border border-white/10 focus:border-bronze-500 focus:outline-none text-xs text-white placeholder-stone-600 font-sans transition-colors" />
+                <input type="text" id="name" name="name" required placeholder="Alex Turner" class="w-full px-3.5 py-2.5 rounded bg-stone-900/90 border border-white/10 focus:border-bronze-500 focus:outline-none text-xs text-white placeholder-stone-600 font-sans transition-colors" />
               </div>
               <div class="space-y-1">
                 <label for="email" class="block text-[11px] font-mono text-stone-400 uppercase">Your Email</label>
-                <input type="email" id="email" required placeholder="alex@domain.com" class="w-full px-3.5 py-2.5 rounded bg-stone-900/90 border border-white/10 focus:border-bronze-500 focus:outline-none text-xs text-white placeholder-stone-600 font-sans transition-colors" />
+                <input type="email" id="email" name="email" required placeholder="alex@domain.com" class="w-full px-3.5 py-2.5 rounded bg-stone-900/90 border border-white/10 focus:border-bronze-500 focus:outline-none text-xs text-white placeholder-stone-600 font-sans transition-colors" />
               </div>
             </div>
 
             <div class="space-y-1">
               <label for="subject" class="block text-[11px] font-mono text-stone-400 uppercase">Topic / Subject</label>
-              <input type="text" id="subject" required placeholder="Project Collaboration / Technical Discussion / Inquiry" class="w-full px-3.5 py-2.5 rounded bg-stone-900/90 border border-white/10 focus:border-bronze-500 focus:outline-none text-xs text-white placeholder-stone-600 font-sans transition-colors" />
+              <input type="text" id="subject" name="subject" required placeholder="Project Collaboration / Technical Discussion / Inquiry" class="w-full px-3.5 py-2.5 rounded bg-stone-900/90 border border-white/10 focus:border-bronze-500 focus:outline-none text-xs text-white placeholder-stone-600 font-sans transition-colors" />
             </div>
 
             <div class="space-y-1">
               <label for="message" class="block text-[11px] font-mono text-stone-400 uppercase">Message</label>
-              <textarea id="message" rows="4" required placeholder="Hey Mridul, I explored your engineering portfolio and wanted to reach out regarding..." class="w-full px-3.5 py-2.5 rounded bg-stone-900/90 border border-white/10 focus:border-bronze-500 focus:outline-none text-xs text-white placeholder-stone-600 font-sans transition-colors resize-none"></textarea>
+              <textarea id="message" name="message" rows="4" required placeholder="Hey Mridul, I explored your engineering portfolio and wanted to reach out regarding..." class="w-full px-3.5 py-2.5 rounded bg-stone-900/90 border border-white/10 focus:border-bronze-500 focus:outline-none text-xs text-white placeholder-stone-600 font-sans transition-colors resize-none"></textarea>
             </div>
 
             <div class="pt-2">
@@ -2160,26 +2168,41 @@
       });
     }
 
-    // --- Form Submit Handler ---
+    // --- Netlify Form Submit Handler ---
     function handleFormSubmit(e) {
       e.preventDefault();
+      const form = document.getElementById('contact-form');
       const btn = document.getElementById('submit-btn');
       const feedback = document.getElementById('form-feedback');
       
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Transmitting...';
 
-      setTimeout(() => {
+      const formData = new FormData(form);
+      const urlEncoded = new URLSearchParams(formData).toString();
+
+      fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: urlEncoded
+      })
+      .then(() => {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[10px]"></i> <span>Send Message</span>';
         feedback.className = 'p-3 rounded text-xs font-mono text-center bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 block';
-        feedback.innerText = 'Transmitted successfully! Thank you for reaching out.';
-        document.getElementById('contact-form').reset();
+        feedback.innerText = 'Transmitted successfully! Your message has been routed to Mridul.';
+        form.reset();
 
         setTimeout(() => {
           feedback.classList.add('hidden');
-        }, 5000);
-      }, 750);
+        }, 6000);
+      })
+      .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[10px]"></i> <span>Send Message</span>';
+        feedback.className = 'p-3 rounded text-xs font-mono text-center bg-rose-500/15 text-rose-300 border border-rose-500/30 block';
+        feedback.innerHTML = 'Transmission error. Please email directly at <a href="mailto:mridul29mishra@gmail.com" class="underline font-bold">mridul29mishra@gmail.com</a>';
+      });
     }
   </script>
 </body>
